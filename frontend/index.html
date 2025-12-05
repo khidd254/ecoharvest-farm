@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoHarvest Farm - Appointment Booking</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 50%, #3ba86f 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(74, 222, 128, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        #root {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .farm-gradient {
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 100%);
+        }
+        
+        .eco-gradient {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #1a5f3f 0%, #16a34a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .slot-available {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .slot-booked {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .notification-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .smooth-transition {
+            transition: all 0.3s ease;
+        }
+        
+        /* Farming theme animations */
+        @keyframes sway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        
+        .farm-icon {
+            animation: sway 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .leaf-decoration {
+            display: inline-block;
+            color: #22c55e;
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+        
+        .header-farm {
+            background: linear-gradient(135deg, rgba(26, 95, 63, 0.9) 0%, rgba(45, 134, 89, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid #22c55e;
+        }
+        
+        .farm-card {
+            border-left: 4px solid #22c55e;
+            position: relative;
+        }
+        
+        .farm-card::before {
+            content: '🌾';
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            font-size: 2rem;
+            opacity: 0.1;
+        }
+        
+        .eco-badge {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .harvest-button {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .harvest-button:hover {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .harvest-button:disabled {
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+        }
+        
+        .farm-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #22c55e, transparent);
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

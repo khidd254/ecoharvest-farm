@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+python-dotenv
+pydantic
+python-multipart
+aiosqlite
+email-validator
+python-jose
+passlib
+argon2-cffi
