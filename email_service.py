@@ -382,11 +382,10 @@ Date & Time: {formatted_time}
 </html>
         """
         
-        # For Resend free tier, send to admin email with client info included
-        # In production with verified domain, change this back to client_email
+        # Send confirmation email to client
         return send_email_via_resend(
-            to=ADMIN_EMAIL,
-            subject=f"🌾 Appointment Confirmation for {client_name}",
+            to=client_email,
+            subject="🌾 Appointment Confirmation - EcoHarvest Farm",
             html=html_body,
         )
 
