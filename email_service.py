@@ -29,16 +29,16 @@ def _init_resend():
         return resend_client
     
     try:
-        from resend import Resend
+        import resend
         if RESEND_API_KEY:
-            resend_client = Resend(api_key=RESEND_API_KEY)
+            resend_client = resend.Resend(api_key=RESEND_API_KEY)
             print(f"[OK] Resend client initialized successfully")
             sys.stdout.flush()
         else:
             print(f"[WARNING] RESEND_API_KEY not set")
             sys.stdout.flush()
-    except ImportError as e:
-        print(f"[WARNING] Failed to import Resend: {str(e)}")
+    except (ImportError, AttributeError) as e:
+        print(f"[WARNING] Failed to initialize Resend: {str(e)}")
         sys.stdout.flush()
     
     return resend_client
