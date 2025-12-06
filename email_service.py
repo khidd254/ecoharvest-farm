@@ -81,43 +81,54 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
     """
     try:
         print(f"[INFO] Attempting to send password reset email to {email}")
-        msg = MIMEMultipart()
-        msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
-        msg['To'] = email
-        msg['Subject'] = "🌾 Password Reset - EcoHarvest Farm"
+        sys.stdout.flush()
+        
+        if not resend_client:
+            print(f"[WARNING] Resend client not configured")
+            sys.stdout.flush()
+            return False
+        
+        html_body = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+<h2>🌾 Password Reset - EcoHarvest Farm</h2>
 
-        body = f"""
-Dear Client,
+<p>Dear Client,</p>
 
-We received a request to reset your password for your EcoHarvest Farm account.
+<p>We received a request to reset your password for your EcoHarvest Farm account.</p>
 
-Click the link below to reset your password (valid for 24 hours):
-{reset_link}
+<p>Click the link below to reset your password (valid for 24 hours):</p>
 
-If you didn't request this, please ignore this email.
+<p><a href="{reset_link}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
 
-Best regards,
-EcoHarvest Farm Team
-🌾 Sustainable Farming Consultation Services
+<p>If you didn't request this, please ignore this email.</p>
+
+<p>Best regards,<br>EcoHarvest Farm Team<br>🌾 Sustainable Farming Consultation Services</p>
+</body>
+</html>
         """
-
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Send email
-        print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            print(f"[INFO] Logging in as {SENDER_EMAIL}")
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
-
+        
+        print(f"[INFO] Sending password reset email via Resend to {email}")
+        sys.stdout.flush()
+        
+        response = resend_client.emails.send({
+            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            "to": email,
+            "subject": "🌾 Password Reset - EcoHarvest Farm",
+            "html": html_body,
+        })
+        
         print(f"[OK] Password reset email sent to {email}")
+        print(f"[INFO] Resend response: {response}")
+        sys.stdout.flush()
         return True
 
     except Exception as e:
         print(f"[ERROR] Failed to send password reset email to {email}: {str(e)}")
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return False
 
 
@@ -140,50 +151,66 @@ def send_appointment_cancellation_email(
         bool: True if successful, False otherwise
     """
     try:
-        msg = MIMEMultipart()
-        msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
-        msg['To'] = client_email
-        msg['Subject'] = "🌾 Appointment Cancellation - EcoHarvest Farm"
-
+        print(f"[INFO] Attempting to send cancellation email to {client_email}")
+        sys.stdout.flush()
+        
+        if not resend_client:
+            print(f"[WARNING] Resend client not configured")
+            sys.stdout.flush()
+            return False
+        
         formatted_time = appointment_time.strftime('%B %d, %Y at %I:%M %p')
         
-        body = f"""
-Dear {client_name},
+        html_body = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+<h2>🌾 Appointment Cancellation - EcoHarvest Farm</h2>
 
-We regret to inform you that your consultation appointment has been cancelled.
+<p>Dear {client_name},</p>
 
-Appointment Details:
-📅 Date & Time: {formatted_time}
-❌ Status: Cancelled
+<p>We regret to inform you that your consultation appointment has been cancelled.</p>
 
-Reason for Cancellation:
-{cancellation_reason}
+<h3>Appointment Details:</h3>
+<ul>
+<li><strong>Date & Time:</strong> {formatted_time}</li>
+<li><strong>Status:</strong> ❌ Cancelled</li>
+</ul>
 
-Refund Policy:
-✅ You will receive a full refund as per our terms and conditions.
+<h3>Reason for Cancellation:</h3>
+<p>{cancellation_reason}</p>
 
-Next Steps:
-Please visit our website to book a new consultation at your convenience.
-We look forward to serving you soon!
+<h3>Refund Policy:</h3>
+<p>✅ You will receive a full refund as per our terms and conditions.</p>
 
-Best regards,
-EcoHarvest Farm Team
-🌾 Sustainable Farming Consultation Services
+<h3>Next Steps:</h3>
+<p>Please visit our website to book a new consultation at your convenience.<br>We look forward to serving you soon!</p>
+
+<p>Best regards,<br>EcoHarvest Farm Team<br>🌾 Sustainable Farming Consultation Services</p>
+</body>
+</html>
         """
-
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Send email
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
-
+        
+        print(f"[INFO] Sending cancellation email via Resend to {client_email}")
+        sys.stdout.flush()
+        
+        response = resend_client.emails.send({
+            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            "to": client_email,
+            "subject": "🌾 Appointment Cancellation - EcoHarvest Farm",
+            "html": html_body,
+        })
+        
         print(f"[OK] Cancellation email sent to {client_email}")
+        print(f"[INFO] Resend response: {response}")
+        sys.stdout.flush()
         return True
 
     except Exception as e:
         print(f"[ERROR] Failed to send cancellation email: {str(e)}")
+        sys.stdout.flush()
+        import traceback
+        traceback.print_exc()
+        sys.stdout.flush()
         return False
 
 
