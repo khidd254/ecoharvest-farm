@@ -238,10 +238,16 @@ EcoHarvest Farm System
 
         # Send email
         print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        sys.stdout.flush()
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
+            print(f"[INFO] Starting TLS")
+            sys.stdout.flush()
             server.starttls()
             print(f"[INFO] Logging in as {SENDER_EMAIL}")
+            sys.stdout.flush()
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            print(f"[INFO] Sending message to {ADMIN_EMAIL}")
+            sys.stdout.flush()
             server.send_message(msg)
 
         print(f"[OK] Admin notification sent for appointment with {client_name}")
@@ -313,10 +319,16 @@ EcoHarvest Farm Team
 
         # Send email
         print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        sys.stdout.flush()
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
+            print(f"[INFO] Starting TLS")
+            sys.stdout.flush()
             server.starttls()
             print(f"[INFO] Logging in as {SENDER_EMAIL}")
+            sys.stdout.flush()
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            print(f"[INFO] Sending message to {client_email}")
+            sys.stdout.flush()
             server.send_message(msg)
 
         print(f"[OK] Confirmation email sent to {client_email}")
