@@ -29,12 +29,11 @@ def _init_resend():
         return resend_client
     
     try:
-        from resend import AsyncResend
+        import resend
         if RESEND_API_KEY:
-            # For sync usage, we'll use the module-level functions
-            import resend as resend_module
-            resend_module.api_key = RESEND_API_KEY
-            resend_client = resend_module  # Store the module itself
+            # Set the API key globally
+            resend.api_key = RESEND_API_KEY
+            resend_client = resend  # Store the module itself
             print(f"[OK] Resend client initialized successfully")
             sys.stdout.flush()
         else:
