@@ -29,9 +29,12 @@ def _init_resend():
         return resend_client
     
     try:
-        import resend
+        from resend import AsyncResend
         if RESEND_API_KEY:
-            resend_client = resend.Resend(api_key=RESEND_API_KEY)
+            # For sync usage, we'll use the module-level functions
+            import resend as resend_module
+            resend_module.api_key = RESEND_API_KEY
+            resend_client = resend_module  # Store the module itself
             print(f"[OK] Resend client initialized successfully")
             sys.stdout.flush()
         else:
@@ -122,12 +125,12 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
         print(f"[INFO] Sending password reset email via Resend to {email}")
         sys.stdout.flush()
         
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": email,
-            "subject": "🌾 Password Reset - EcoHarvest Farm",
-            "html": html_body,
-        })
+        response = client.emails.send(
+            from_=f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            to=email,
+            subject="🌾 Password Reset - EcoHarvest Farm",
+            html=html_body,
+        )
         
         print(f"[OK] Password reset email sent to {email}")
         print(f"[INFO] Resend response: {response}")
@@ -205,12 +208,12 @@ def send_appointment_cancellation_email(
         print(f"[INFO] Sending cancellation email via Resend to {client_email}")
         sys.stdout.flush()
         
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": client_email,
-            "subject": "🌾 Appointment Cancellation - EcoHarvest Farm",
-            "html": html_body,
-        })
+        response = client.emails.send(
+            from_=f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            to=client_email,
+            subject="🌾 Appointment Cancellation - EcoHarvest Farm",
+            html=html_body,
+        )
         
         print(f"[OK] Cancellation email sent to {client_email}")
         print(f"[INFO] Resend response: {response}")
@@ -304,12 +307,12 @@ Date & Time: {formatted_time}
         print(f"[INFO] Sending email via Resend to {ADMIN_EMAIL}")
         sys.stdout.flush()
         
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": ADMIN_EMAIL,
-            "subject": f"🌾 New Appointment Booking - {client_name}",
-            "html": html_body,
-        })
+        response = client.emails.send(
+            from_=f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            to=ADMIN_EMAIL,
+            subject=f"🌾 New Appointment Booking - {client_name}",
+            html=html_body,
+        )
         
         print(f"[OK] Admin notification sent for appointment with {client_name}")
         print(f"[INFO] Resend response: {response}")
@@ -401,12 +404,12 @@ Date & Time: {formatted_time}
         print(f"[INFO] Sending confirmation email via Resend to {client_email}")
         sys.stdout.flush()
         
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": client_email,
-            "subject": "🌾 Appointment Confirmation - EcoHarvest Farm",
-            "html": html_body,
-        })
+        response = client.emails.send(
+            from_=f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            to=client_email,
+            subject="🌾 Appointment Confirmation - EcoHarvest Farm",
+            html=html_body,
+        )
         
         print(f"[OK] Confirmation email sent to {client_email}")
         print(f"[INFO] Resend response: {response}")
