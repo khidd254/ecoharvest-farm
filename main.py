@@ -27,6 +27,7 @@ import os
 from typing import List, Optional
 from passlib.context import CryptContext
 from sqlalchemy import select
+from concurrent.futures import ThreadPoolExecutor
 
 from database import init_db, get_db, SessionLocal
 from models import Appointment, Owner, Notification, User
@@ -103,6 +104,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 appointment_service = AppointmentService()
 availability_service = AvailabilityService()
 notification_service = NotificationService()
+
+# Thread pool for sending emails asynchronously
+email_executor = ThreadPoolExecutor(max_workers=2)
 
 # Store active WebSocket connections for real-time notifications
 active_connections: List[WebSocket] = []
@@ -214,13 +218,28 @@ async def create_appointment(
         db=db,
     )
 
-    # Send email notification to admin
-    send_admin_appointment_notification(
-        client_name=appointment.client_name,
-        client_email=appointment.client_email,
-        client_phone=appointment.client_phone or "Not provided",
-        appointment_time=appointment.appointment_time,
-        notes=appointment.notes
+    # Send emails asynchronously (non-blocking)
+    loop = asyncio.get_event_loop()
+    
+    # Send admin notification email
+    loop.run_in_executor(
+        email_executor,
+        send_admin_appointment_notification,
+        appointment.client_name,
+        appointment.client_email,
+        appointment.client_phone or "Not provided",
+        appointment.appointment_time,
+        appointment.notes
+    )
+    
+    # Send client confirmation email
+    loop.run_in_executor(
+        email_executor,
+        send_appointment_confirmation_email,
+        appointment.client_email,
+        appointment.client_name,
+        appointment.appointment_time,
+        appointment.notes
     )
 
     return AppointmentResponse.from_orm(appointment)
