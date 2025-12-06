@@ -12,8 +12,14 @@ const { createApp, ref, reactive, computed, onMounted, onUnmounted } = Vue;
 // CONFIGURATION
 // ============================================================================
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const WS_URL = 'ws://localhost:8000/ws/notifications';
+// Use environment variables for deployment, fallback to localhost for development
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000/api'
+    : (window.API_BASE_URL || 'https://your-railway-app.railway.app/api');
+
+const WS_URL = window.location.hostname === 'localhost'
+    ? 'ws://localhost:8000/ws/notifications'
+    : (window.WS_URL || 'wss://your-railway-app.railway.app/ws/notifications');
 
 // ============================================================================
 // VUE APP DEFINITION
