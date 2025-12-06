@@ -1,19 +1,12 @@
 {
   "version": 2,
-  "builds": [
+  "public": "frontend",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
     {
-      "src": "frontend/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/frontend/(.*)",
-      "dest": "/frontend/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
