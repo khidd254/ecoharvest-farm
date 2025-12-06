@@ -5,6 +5,7 @@ Handles sending emails for password resets and appointment notifications
 
 import smtplib
 import secrets
+import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
@@ -30,6 +31,7 @@ print(f"  SMTP_PORT: {SMTP_PORT}")
 print(f"  SENDER_EMAIL: {SENDER_EMAIL}")
 print(f"  ADMIN_EMAIL: {ADMIN_EMAIL}")
 print(f"  SENDER_PASSWORD: {'*' * len(SENDER_PASSWORD) if SENDER_PASSWORD else 'NOT SET'}")
+sys.stdout.flush()
 
 # Store reset tokens in memory (in production, use database)
 reset_tokens = {}
@@ -243,12 +245,15 @@ EcoHarvest Farm System
             server.send_message(msg)
 
         print(f"[OK] Admin notification sent for appointment with {client_name}")
+        sys.stdout.flush()
         return True
 
     except Exception as e:
         print(f"[ERROR] Failed to send admin notification to {ADMIN_EMAIL}: {str(e)}")
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return False
 
 
@@ -315,10 +320,13 @@ EcoHarvest Farm Team
             server.send_message(msg)
 
         print(f"[OK] Confirmation email sent to {client_email}")
+        sys.stdout.flush()
         return True
 
     except Exception as e:
         print(f"[ERROR] Failed to send confirmation email to {client_email}: {str(e)}")
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return False

@@ -253,7 +253,7 @@ async def create_appointment(
     loop = asyncio.get_event_loop()
     
     # Send admin notification email
-    loop.run_in_executor(
+    admin_task = loop.run_in_executor(
         email_executor,
         send_admin_email_wrapper,
         appointment.client_name,
@@ -264,7 +264,7 @@ async def create_appointment(
     )
     
     # Send client confirmation email
-    loop.run_in_executor(
+    client_task = loop.run_in_executor(
         email_executor,
         send_client_email_wrapper,
         appointment.client_email,
@@ -272,6 +272,9 @@ async def create_appointment(
         appointment.appointment_time,
         appointment.notes
     )
+    
+    # Don't wait for emails, just fire and forget
+    # The tasks will complete in the background
 
     return AppointmentResponse.from_orm(appointment)
 
