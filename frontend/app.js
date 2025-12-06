@@ -15,11 +15,11 @@ const { createApp, ref, reactive, computed, onMounted, onUnmounted } = Vue;
 // Use environment variables for deployment, fallback to localhost for development
 const API_BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:8000/api'
-    : (window.API_BASE_URL || 'https://your-railway-app.railway.app/api');
+    : (window.API_BASE_URL || 'https://ecoharvest-farm-production.up.railway.app/api');
 
 const WS_URL = window.location.hostname === 'localhost'
     ? 'ws://localhost:8000/ws/notifications'
-    : (window.WS_URL || 'wss://your-railway-app.railway.app/ws/notifications');
+    : (window.WS_URL || 'wss://ecoharvest-farm-production.up.railway.app/ws/notifications');
 
 // ============================================================================
 // VUE APP DEFINITION
