@@ -1086,16 +1086,12 @@ const app = createApp({
 
         const checkAdminPassword = () => {
             adminError.value = '';
-            console.log('Admin password entered:', adminPassword.value);
-            console.log('Expected password:', ADMIN_PASSWORD);
             if (adminPassword.value === ADMIN_PASSWORD) {
-                console.log('Password correct! Logging in...');
                 isAdmin.value = true;
                 showAdminLogin.value = false;
                 adminPassword.value = '';
                 activeTab.value = 'calendar';
             } else {
-                console.log('Password incorrect');
                 adminError.value = 'Invalid password';
                 adminPassword.value = '';
             }
