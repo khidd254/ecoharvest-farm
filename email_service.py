@@ -1,10 +1,12 @@
 """
 Email Service for EcoHarvest Farm Appointment System
-Handles sending emails for password resets and appointment notifications using Resend
+Handles sending emails for password resets and appointment notifications using Resend REST API
 """
 
 import secrets
 import sys
+import requests
+import json
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -19,29 +21,61 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
 SENDER_NAME = "EcoHarvest Farm"
 
-# Initialize Resend client (lazy import)
-resend_client = None
+# Resend API endpoint
+RESEND_API_URL = "https://api.resend.com/emails"
 
-def _init_resend():
-    """Initialize Resend client on first use"""
-    global resend_client
-    if resend_client is not None:
-        return resend_client
+def send_email_via_resend(to: str, subject: str, html: str) -> bool:
+    """
+    Send email via Resend REST API
+    
+    Args:
+        to: Recipient email
+        subject: Email subject
+        html: HTML email body
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    if not RESEND_API_KEY:
+        print(f"[WARNING] RESEND_API_KEY not set")
+        sys.stdout.flush()
+        return False
     
     try:
-        from resend import Resend as ResendClient
-        if RESEND_API_KEY:
-            resend_client = ResendClient(api_key=RESEND_API_KEY)
-            print(f"[OK] Resend client initialized successfully")
-            sys.stdout.flush()
-        else:
-            print(f"[WARNING] RESEND_API_KEY not set")
-            sys.stdout.flush()
-    except (ImportError, AttributeError) as e:
-        print(f"[WARNING] Failed to initialize Resend: {str(e)}")
+        headers = {
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        
+        payload = {
+            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
+            "to": to,
+            "subject": subject,
+            "html": html,
+        }
+        
+        print(f"[INFO] Sending email via Resend API to {to}")
         sys.stdout.flush()
+        
+        response = requests.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
+        
+        if response.status_code in [200, 201]:
+            print(f"[OK] Email sent successfully to {to}")
+            print(f"[INFO] Resend response: {response.json()}")
+            sys.stdout.flush()
+            return True
+        else:
+            print(f"[ERROR] Resend API error: {response.status_code} - {response.text}")
+            sys.stdout.flush()
+            return False
     
-    return resend_client
+    except Exception as e:
+        print(f"[ERROR] Failed to send email via Resend: {str(e)}")
+        sys.stdout.flush()
+        import traceback
+        traceback.print_exc()
+        sys.stdout.flush()
+        return False
 
 # Debug: Print email configuration on startup
 print(f"[DEBUG] Email Configuration Loaded:")
@@ -93,12 +127,6 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
         print(f"[INFO] Attempting to send password reset email to {email}")
         sys.stdout.flush()
         
-        client = _init_resend()
-        if not client:
-            print(f"[WARNING] Resend client not available")
-            sys.stdout.flush()
-            return False
-        
         html_body = f"""
 <html>
 <body style="font-family: Arial, sans-serif; color: #333;">
@@ -119,20 +147,11 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
 </html>
         """
         
-        print(f"[INFO] Sending password reset email via Resend to {email}")
-        sys.stdout.flush()
-        
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": email,
-            "subject": "🌾 Password Reset - EcoHarvest Farm",
-            "html": html_body,
-        })
-        
-        print(f"[OK] Password reset email sent to {email}")
-        print(f"[INFO] Resend response: {response}")
-        sys.stdout.flush()
-        return True
+        return send_email_via_resend(
+            to=email,
+            subject="🌾 Password Reset - EcoHarvest Farm",
+            html=html_body,
+        )
 
     except Exception as e:
         print(f"[ERROR] Failed to send password reset email to {email}: {str(e)}")
@@ -165,12 +184,6 @@ def send_appointment_cancellation_email(
         print(f"[INFO] Attempting to send cancellation email to {client_email}")
         sys.stdout.flush()
         
-        client = _init_resend()
-        if not client:
-            print(f"[WARNING] Resend client not available")
-            sys.stdout.flush()
-            return False
-        
         formatted_time = appointment_time.strftime('%B %d, %Y at %I:%M %p')
         
         html_body = f"""
@@ -202,20 +215,11 @@ def send_appointment_cancellation_email(
 </html>
         """
         
-        print(f"[INFO] Sending cancellation email via Resend to {client_email}")
-        sys.stdout.flush()
-        
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": client_email,
-            "subject": "🌾 Appointment Cancellation - EcoHarvest Farm",
-            "html": html_body,
-        })
-        
-        print(f"[OK] Cancellation email sent to {client_email}")
-        print(f"[INFO] Resend response: {response}")
-        sys.stdout.flush()
-        return True
+        return send_email_via_resend(
+            to=client_email,
+            subject="🌾 Appointment Cancellation - EcoHarvest Farm",
+            html=html_body,
+        )
 
     except Exception as e:
         print(f"[ERROR] Failed to send cancellation email: {str(e)}")
@@ -265,13 +269,7 @@ Date & Time: {formatted_time}
         print(log_message)
         sys.stdout.flush()
         
-        client = _init_resend()
-        if not client:
-            print(f"[WARNING] Resend client not available")
-            sys.stdout.flush()
-            return False
-        
-        # Send email via Resend
+        # Send email via Resend REST API
         html_body = f"""
 <html>
 <body style="font-family: Arial, sans-serif; color: #333;">
@@ -301,20 +299,11 @@ Date & Time: {formatted_time}
 </html>
 """
         
-        print(f"[INFO] Sending email via Resend to {ADMIN_EMAIL}")
-        sys.stdout.flush()
-        
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": ADMIN_EMAIL,
-            "subject": f"🌾 New Appointment Booking - {client_name}",
-            "html": html_body,
-        })
-        
-        print(f"[OK] Admin notification sent for appointment with {client_name}")
-        print(f"[INFO] Resend response: {response}")
-        sys.stdout.flush()
-        return True
+        return send_email_via_resend(
+            to=ADMIN_EMAIL,
+            subject=f"🌾 New Appointment Booking - {client_name}",
+            html=html_body,
+        )
 
     except Exception as e:
         print(f"[ERROR] Failed to send admin notification: {str(e)}")
@@ -360,13 +349,7 @@ Date & Time: {formatted_time}
         print(log_message)
         sys.stdout.flush()
         
-        client = _init_resend()
-        if not client:
-            print(f"[WARNING] Resend client not available")
-            sys.stdout.flush()
-            return False
-        
-        # Send email via Resend
+        # Send email via Resend REST API
         html_body = f"""
 <html>
 <body style="font-family: Arial, sans-serif; color: #333;">
@@ -398,20 +381,11 @@ Date & Time: {formatted_time}
 </html>
         """
         
-        print(f"[INFO] Sending confirmation email via Resend to {client_email}")
-        sys.stdout.flush()
-        
-        response = client.emails.send({
-            "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
-            "to": client_email,
-            "subject": "🌾 Appointment Confirmation - EcoHarvest Farm",
-            "html": html_body,
-        })
-        
-        print(f"[OK] Confirmation email sent to {client_email}")
-        print(f"[INFO] Resend response: {response}")
-        sys.stdout.flush()
-        return True
+        return send_email_via_resend(
+            to=client_email,
+            subject="🌾 Appointment Confirmation - EcoHarvest Farm",
+            html=html_body,
+        )
 
     except Exception as e:
         print(f"[ERROR] Failed to send confirmation email to {client_email}: {str(e)}")
