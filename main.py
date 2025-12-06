@@ -113,6 +113,37 @@ active_connections: List[WebSocket] = []
 
 
 # ============================================================================
+# EMAIL HELPER FUNCTIONS
+# ============================================================================
+
+def send_admin_email_wrapper(client_name: str, client_email: str, client_phone: str, appointment_time: datetime, notes: str = None):
+    """Wrapper function for sending admin notification email"""
+    try:
+        send_admin_appointment_notification(
+            client_name=client_name,
+            client_email=client_email,
+            client_phone=client_phone,
+            appointment_time=appointment_time,
+            notes=notes
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to send admin email in background: {str(e)}")
+
+
+def send_client_email_wrapper(client_email: str, client_name: str, appointment_time: datetime, notes: str = None):
+    """Wrapper function for sending client confirmation email"""
+    try:
+        send_appointment_confirmation_email(
+            client_email=client_email,
+            client_name=client_name,
+            appointment_time=appointment_time,
+            notes=notes
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to send client email in background: {str(e)}")
+
+
+# ============================================================================
 # WEBSOCKET ENDPOINT - Real-time Notifications
 # ============================================================================
 
@@ -224,7 +255,7 @@ async def create_appointment(
     # Send admin notification email
     loop.run_in_executor(
         email_executor,
-        send_admin_appointment_notification,
+        send_admin_email_wrapper,
         appointment.client_name,
         appointment.client_email,
         appointment.client_phone or "Not provided",
@@ -235,7 +266,7 @@ async def create_appointment(
     # Send client confirmation email
     loop.run_in_executor(
         email_executor,
-        send_appointment_confirmation_email,
+        send_client_email_wrapper,
         appointment.client_email,
         appointment.client_name,
         appointment.appointment_time,
