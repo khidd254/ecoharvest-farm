@@ -23,6 +23,14 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL", "your-email@gmail.com")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "your-app-password")
 SENDER_NAME = "EcoHarvest Farm"
 
+# Debug: Print email configuration on startup
+print(f"[DEBUG] Email Configuration Loaded:")
+print(f"  SMTP_SERVER: {SMTP_SERVER}")
+print(f"  SMTP_PORT: {SMTP_PORT}")
+print(f"  SENDER_EMAIL: {SENDER_EMAIL}")
+print(f"  ADMIN_EMAIL: {ADMIN_EMAIL}")
+print(f"  SENDER_PASSWORD: {'*' * len(SENDER_PASSWORD) if SENDER_PASSWORD else 'NOT SET'}")
+
 # Store reset tokens in memory (in production, use database)
 reset_tokens = {}
 
@@ -63,6 +71,7 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
         bool: True if successful, False otherwise
     """
     try:
+        print(f"[INFO] Attempting to send password reset email to {email}")
         msg = MIMEMultipart()
         msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
         msg['To'] = email
@@ -86,8 +95,10 @@ EcoHarvest Farm Team
         msg.attach(MIMEText(body, 'plain'))
 
         # Send email
+        print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
+            print(f"[INFO] Logging in as {SENDER_EMAIL}")
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
 
@@ -95,7 +106,9 @@ EcoHarvest Farm Team
         return True
 
     except Exception as e:
-        print(f"[ERROR] Failed to send password reset email: {str(e)}")
+        print(f"[ERROR] Failed to send password reset email to {email}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -186,6 +199,7 @@ def send_admin_appointment_notification(
         bool: True if successful, False otherwise
     """
     try:
+        print(f"[INFO] Attempting to send admin notification to {ADMIN_EMAIL}")
         msg = MIMEMultipart()
         msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
         msg['To'] = ADMIN_EMAIL
@@ -221,8 +235,10 @@ EcoHarvest Farm System
         msg.attach(MIMEText(body, 'plain'))
 
         # Send email
+        print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
+            print(f"[INFO] Logging in as {SENDER_EMAIL}")
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
 
@@ -230,7 +246,9 @@ EcoHarvest Farm System
         return True
 
     except Exception as e:
-        print(f"[ERROR] Failed to send admin notification: {str(e)}")
+        print(f"[ERROR] Failed to send admin notification to {ADMIN_EMAIL}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -253,6 +271,7 @@ def send_appointment_confirmation_email(
         bool: True if successful, False otherwise
     """
     try:
+        print(f"[INFO] Attempting to send confirmation email to {client_email}")
         msg = MIMEMultipart()
         msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
         msg['To'] = client_email
@@ -288,8 +307,10 @@ EcoHarvest Farm Team
         msg.attach(MIMEText(body, 'plain'))
 
         # Send email
+        print(f"[INFO] Connecting to SMTP server {SMTP_SERVER}:{SMTP_PORT}")
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
+            print(f"[INFO] Logging in as {SENDER_EMAIL}")
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
 
@@ -297,5 +318,7 @@ EcoHarvest Farm Team
         return True
 
     except Exception as e:
-        print(f"[ERROR] Failed to send confirmation email: {str(e)}")
+        print(f"[ERROR] Failed to send confirmation email to {client_email}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
