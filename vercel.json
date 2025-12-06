@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "public": "frontend",
+  "buildCommand": "echo 'Frontend ready'",
+  "outputDirectory": "frontend",
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
