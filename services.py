@@ -230,6 +230,8 @@ class AvailabilityService:
         - Break duration (10 minutes between sessions)
         - Lunch break (12 PM - 1 PM)
         - Existing appointments
+        - No weekends (Saturday/Sunday)
+        - Within next 30 days only
 
         Args:
             slot_date: Date to get available slots for
@@ -239,6 +241,15 @@ class AvailabilityService:
             List[AvailableSlotResponse]: List of available time slots
         """
         available_slots = []
+        
+        # Check if date is a weekend (5=Saturday, 6=Sunday)
+        if slot_date.weekday() >= 5:
+            return available_slots  # No slots on weekends
+        
+        # Check if date is within next 30 days
+        today = datetime.now().date()
+        if slot_date < today or (slot_date - today).days > 30:
+            return available_slots  # No slots outside 30-day window
 
         # Start from business hours start
         current_time = datetime.combine(slot_date, self.BUSINESS_START)
