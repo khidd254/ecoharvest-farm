@@ -9,13 +9,6 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
-try:
-    from resend import Resend
-    RESEND_AVAILABLE = True
-except ImportError:
-    RESEND_AVAILABLE = False
-    print("[WARNING] Resend library not installed. Email sending will be disabled.")
-
 load_dotenv()
 
 # Admin email (get from environment or use default)
@@ -26,18 +19,35 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
 SENDER_NAME = "EcoHarvest Farm"
 
-# Initialize Resend client
-if RESEND_AVAILABLE and RESEND_API_KEY:
-    resend_client = Resend(api_key=RESEND_API_KEY)
-else:
-    resend_client = None
+# Initialize Resend client (lazy import)
+resend_client = None
+
+def _init_resend():
+    """Initialize Resend client on first use"""
+    global resend_client
+    if resend_client is not None:
+        return resend_client
+    
+    try:
+        from resend import Resend
+        if RESEND_API_KEY:
+            resend_client = Resend(api_key=RESEND_API_KEY)
+            print(f"[OK] Resend client initialized successfully")
+            sys.stdout.flush()
+        else:
+            print(f"[WARNING] RESEND_API_KEY not set")
+            sys.stdout.flush()
+    except ImportError as e:
+        print(f"[WARNING] Failed to import Resend: {str(e)}")
+        sys.stdout.flush()
+    
+    return resend_client
 
 # Debug: Print email configuration on startup
 print(f"[DEBUG] Email Configuration Loaded:")
 print(f"  SENDER_EMAIL: {SENDER_EMAIL}")
 print(f"  ADMIN_EMAIL: {ADMIN_EMAIL}")
 print(f"  RESEND_API_KEY: {'*' * 10 if RESEND_API_KEY else 'NOT SET'}")
-print(f"  RESEND_AVAILABLE: {RESEND_AVAILABLE}")
 sys.stdout.flush()
 
 # Store reset tokens in memory (in production, use database)
@@ -83,8 +93,9 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
         print(f"[INFO] Attempting to send password reset email to {email}")
         sys.stdout.flush()
         
-        if not resend_client:
-            print(f"[WARNING] Resend client not configured")
+        client = _init_resend()
+        if not client:
+            print(f"[WARNING] Resend client not available")
             sys.stdout.flush()
             return False
         
@@ -111,7 +122,7 @@ def send_password_reset_email(email: str, reset_link: str) -> bool:
         print(f"[INFO] Sending password reset email via Resend to {email}")
         sys.stdout.flush()
         
-        response = resend_client.emails.send({
+        response = client.emails.send({
             "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
             "to": email,
             "subject": "🌾 Password Reset - EcoHarvest Farm",
@@ -154,8 +165,9 @@ def send_appointment_cancellation_email(
         print(f"[INFO] Attempting to send cancellation email to {client_email}")
         sys.stdout.flush()
         
-        if not resend_client:
-            print(f"[WARNING] Resend client not configured")
+        client = _init_resend()
+        if not client:
+            print(f"[WARNING] Resend client not available")
             sys.stdout.flush()
             return False
         
@@ -193,7 +205,7 @@ def send_appointment_cancellation_email(
         print(f"[INFO] Sending cancellation email via Resend to {client_email}")
         sys.stdout.flush()
         
-        response = resend_client.emails.send({
+        response = client.emails.send({
             "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
             "to": client_email,
             "subject": "🌾 Appointment Cancellation - EcoHarvest Farm",
@@ -253,8 +265,9 @@ Date & Time: {formatted_time}
         print(log_message)
         sys.stdout.flush()
         
-        if not resend_client:
-            print(f"[WARNING] Resend client not configured")
+        client = _init_resend()
+        if not client:
+            print(f"[WARNING] Resend client not available")
             sys.stdout.flush()
             return False
         
@@ -291,7 +304,7 @@ Date & Time: {formatted_time}
         print(f"[INFO] Sending email via Resend to {ADMIN_EMAIL}")
         sys.stdout.flush()
         
-        response = resend_client.emails.send({
+        response = client.emails.send({
             "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
             "to": ADMIN_EMAIL,
             "subject": f"🌾 New Appointment Booking - {client_name}",
@@ -347,8 +360,9 @@ Date & Time: {formatted_time}
         print(log_message)
         sys.stdout.flush()
         
-        if not resend_client:
-            print(f"[WARNING] Resend client not configured")
+        client = _init_resend()
+        if not client:
+            print(f"[WARNING] Resend client not available")
             sys.stdout.flush()
             return False
         
@@ -387,7 +401,7 @@ Date & Time: {formatted_time}
         print(f"[INFO] Sending confirmation email via Resend to {client_email}")
         sys.stdout.flush()
         
-        response = resend_client.emails.send({
+        response = client.emails.send({
             "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
             "to": client_email,
             "subject": "🌾 Appointment Confirmation - EcoHarvest Farm",
